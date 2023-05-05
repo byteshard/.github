@@ -1,0 +1,55 @@
+name: Composer package template
+
+on:
+  push:
+  pull_request:
+    branches: [ $default-branch ]
+
+jobs:
+  phpstan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: php-actions/composer@v6
+      - name: PHPStan Static Analysis
+        uses: php-actions/phpstan@v3
+  semrel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+      - name: Install semantic-release extra plugins
+        run: npm install -g conventional-changelog-conventionalcommits @semantic-release/git @semantic-release/changelog semantic-release@21
+      - name: Create .releaserc
+        run: |
+          cat <<EOF >> .releaserc
+          {
+            "branches": [
+              "$default-branch"
+            ],
+            "plugins": [
+              [
+                "@semantic-release/commit-analyzer",
+                {
+                  "preset": "conventionalcommits"
+                }
+              ],
+              "@semantic-release/changelog",
+              "@semantic-release/release-notes-generator",
+              [
+                "@semantic-release/git",
+                {
+                  "assets": ["CHANGELOG.md"]
+                }
+              ]
+            ]
+          }
+          EOF
+      - name: config
+        run: cat .releaserc
+      - name: Release
+        run: semantic-release
