@@ -1,0 +1,4 @@
+{
+  "name": "PHP Composer package workflow",
+  "description": "Workflow including phpstan and semantic versioning"
+}
